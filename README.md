@@ -1,154 +1,167 @@
 # 📚 Book Seller Project
 
-Dự án **Book Seller** là một ứng dụng thương mại điện tử mua bán sách trực tuyến hoàn chỉnh, kết hợp giữa backend mạnh mẽ xây dựng trên **FastAPI** và ứng dụng di động/đa nền tảng hiện đại viết bằng **Flutter**.
+The **Book Seller** project is a online book e-commerce application, combining a robust backend built on **FastAPI** and a modern mobile/cross-platform application written in **Flutter**.
 
-Hệ thống được chia thành 2 phân hệ chính (Customer và Admin) với đầy đủ các tính năng cần thiết của một nền tảng bán hàng chuyên nghiệp.
-
----
-
-## 🚀 Các tính năng chính
-
-### 👤 Phân hệ Khách hàng (Customer)
-*   **Trang chủ & Khám phá:** Xem các sách mới, sách bán chạy, tìm kiếm và lọc sách theo danh mục.
-*   **Chi tiết sách:** Xem thông tin chi tiết, tác giả, nhà xuất bản, đánh giá và nhận xét từ người mua khác.
-*   **Giỏ hàng (Cart):** Thêm, sửa số lượng, xóa sách trong giỏ hàng.
-*   **Mã giảm giá (Coupon):** Áp dụng mã giảm giá khi thanh toán để được giảm giá đơn hàng.
-*   **Thanh toán (Checkout):** Nhập thông tin giao hàng và xác nhận đơn hàng.
-*   **Quản lý đơn hàng:** Xem lịch sử mua hàng, chi tiết từng đơn hàng và trạng thái vận chuyển.
-*   **Yêu thích (Wishlist):** Lưu các cuốn sách yêu thích để mua sau.
-*   **Tài khoản & Hồ sơ:** Cập nhật thông tin cá nhân, mật khẩu.
-
-### 👑 Phân hệ Quản trị viên (Admin)
-*   **Bảng điều khiển (Dashboard):** Thống kê tổng quan về doanh thu, số lượng đơn hàng, sách bán chạy.
-*   **Quản lý Sách:** Thêm mới sách, cập nhật thông tin (tiêu đề, giá, mô tả, ảnh, số lượng kho) hoặc xóa sách.
-*   **Quản lý Danh mục (Categories):** Thêm, sửa, xóa danh mục sách.
-*   **Quản lý Mã giảm giá (Coupons):** Tạo mới mã giảm giá, thiết lập mức giảm, ngày hết hạn và quản lý mã.
-*   **Quản lý Đơn hàng:** Xem tất cả đơn đặt hàng, cập nhật trạng thái đơn hàng (Chờ xử lý, Đang giao, Đã giao, Đã hủy).
-*   **Quản lý Người dùng (Users):** Xem danh sách khách hàng và quản lý trạng thái tài khoản (Kích hoạt / Khóa).
+The system is divided into 2 main modules (Customer and Admin) with all the necessary features of a professional sales platform.
 
 ---
 
-## 🛠️ Công nghệ sử dụng
+## 🚀 Key Features
+
+### 👤 Customer Module
+
+* **Home & Explore:** View new books, bestsellers, search and filter books by category.
+* **Book Details:** View detailed information, author, publisher, ratings, and reviews from other buyers.
+* **Cart:** Add, update quantity, and remove books in the cart.
+* **Coupon:** Apply discount codes at checkout to get order discounts.
+* **Checkout:** Enter shipping information and confirm the order.
+* **Order Management:** View purchase history, individual order details, and shipping status.
+* **Wishlist:** Save favorite books to buy later.
+* **Account & Profile:** Update personal information and password.
+
+### 👑 Admin Module
+
+* **Dashboard:** Overview statistics on revenue, number of orders, and bestselling books.
+* **Book Management:** Add new books, update information (title, price, description, image, stock quantity), or delete books.
+* **Category Management:** Add, edit, and delete book categories.
+* **Coupon Management:** Create new discount codes, set discount rates, expiration dates, and manage codes.
+* **Order Management:** View all orders, update order status (Pending, Shipping, Delivered, Canceled).
+* **User Management:** View customer list and manage account status (Active / Locked).
+
+---
+
+## 🛠️ Technologies Used
 
 ### Backend
-*   **Framework:** [FastAPI](https://fastapi.tiangolo.com/) - Hiệu năng cực cao, tự động sinh tài liệu API (Swagger UI).
-*   **Database ORM:** [SQLAlchemy](https://www.sqlalchemy.org/) kết hợp với CSDL **SQLite** (`books.db`).
-*   **Validation:** [Pydantic v2](https://docs.pydantic.dev/) để kiểm tra tính hợp lệ của dữ liệu đầu vào.
-*   **Security:** [python-jose](https://github.com/mpdavis/python-jose) (JWT tokens), [passlib](https://passlib.readthedocs.io/) & [bcrypt](https://github.com/pyca/bcrypt) để mã hóa mật khẩu bảo mật.
+
+* **Framework:** [FastAPI](https://fastapi.tiangolo.com/) - Ultra-high performance, automatic API documentation generation (Swagger UI).
+* **Database ORM:** [SQLAlchemy](https://www.sqlalchemy.org/) integrated with **SQLite** database (`books.db`).
+* **Validation:** [Pydantic v2](https://docs.pydantic.dev/) for input data validation.
+* **Security:** [python-jose](https://github.com/mpdavis/python-jose) (JWT tokens), [passlib](https://passlib.readthedocs.io/) & [bcrypt](https://github.com/pyca/bcrypt) for secure password hashing.
 
 ### Frontend
-*   **Framework:** [Flutter SDK](https://flutter.dev/) (Dart) - Phát triển ứng dụng đa nền tảng.
-*   **State Management:** [Provider](https://pub.dev/packages/provider) - Quản lý trạng thái ứng dụng tập trung và hiệu quả.
-*   **Networking:** [Dio](https://pub.dev/packages/dio) - Thư viện HTTP client mạnh mẽ hỗ trợ Interceptors và quản lý lỗi tốt.
-*   **Local Storage:** [Flutter Secure Storage](https://pub.dev/packages/flutter_secure_storage) - Lưu trữ access token một cách an toàn trên thiết bị.
-*   **UI Components:** Material Design kết hợp Cupertino Icons.
+
+* **Framework:** [Flutter SDK](https://flutter.dev/) (Dart) - Cross-platform app development.
+* **State Management:** [Provider](https://pub.dev/packages/provider) - Centralized and efficient application state management.
+* **Networking:** [Dio](https://pub.dev/packages/dio) - Powerful HTTP client library supporting Interceptors and solid error handling.
+* **Local Storage:** [Flutter Secure Storage](https://pub.dev/packages/flutter_secure_storage) - Safely store access tokens on the device.
+* **UI Components:** Material Design combined with Cupertino Icons.
 
 ---
 
-## 📂 Cấu trúc thư mục dự án
+## 📂 Project Directory Structure
 
 ```text
 book-seller/
-├── backend/                  # Mã nguồn Backend (FastAPI)
-│   ├── app/                  # Thư mục chính của ứng dụng
-│   │   ├── routers/          # Các đầu API (auth, books, orders,...)
-│   │   ├── database.py       # Cấu hình kết nối SQLAlchemy & SQLite
-│   │   ├── models.py         # Định nghĩa các bảng trong CSDL (Models)
-│   │   ├── schemas.py        # Định nghĩa kiểu dữ liệu truyền nhận (Pydantic Schemas)
-│   │   ├── auth.py           # Tiện ích mã hóa & xử lý JWT Token
-│   │   └── main.py           # Điểm khởi chạy API và đăng ký routers
-│   ├── seed_data.py          # Script nạp dữ liệu mẫu ban đầu
-│   ├── requirements.txt      # Các thư viện Python cần cài đặt
-│   └── books.db              # File CSDL SQLite (tự động tạo)
+├── backend/                  # Backend Source Code (FastAPI)
+│   ├── app/                  # Main application directory
+│   │   ├── routers/          # API endpoints (auth, books, orders,...)
+│   │   ├── database.py       # SQLAlchemy & SQLite connection configuration
+│   │   ├── models.py         # Database table definitions (Models)
+│   │   ├── schemas.py        # Data transfer object definitions (Pydantic Schemas)
+│   │   ├── auth.py           # Encryption & JWT Token handling utilities
+│   │   └── main.py           # API entry point and router registration
+│   ├── seed_data.py          # Initial sample data seeding script
+│   ├── requirements.txt      # Required Python libraries
+│   └── books.db              # SQLite database file (auto-generated)
 │
-├── frontend/                 # Mã nguồn Frontend (Flutter)
-│   ├── lib/                  # Mã nguồn Dart chính
-│   │   ├── core/             # Cấu hình dùng chung (API client, constants, theme,...)
-│   │   ├── models/           # Các lớp ánh xạ dữ liệu (Book, User, Order,...)
-│   │   ├── providers/        # Quản lý trạng thái (Auth, Cart, Order, Book Providers)
-│   │   ├── screens/          # Các giao diện màn hình (Auth, Customer, Admin)
-│   │   └── widgets/          # Các components UI tái sử dụng
-│   ├── pubspec.yaml          # Quản lý thư viện và tài nguyên của Flutter
+├── frontend/                 # Frontend Source Code (Flutter)
+│   ├── lib/                  # Main Dart source code
+│   │   ├── core/             # Shared configuration (API client, constants, theme,...)
+│   │   ├── models/           # Data mapping classes (Book, User, Order,...)
+│   │   ├── providers/        # State management (Auth, Cart, Order, Book Providers)
+│   │   ├── screens/          # UI screens (Auth, Customer, Admin)
+│   │   └── widgets/          # Reusable UI components
+│   ├── pubspec.yaml          # Flutter packages and resources management
 │   └── ...
-└── README.md                 # Tài liệu hướng dẫn dự án (File này)
+└── README.md                 # Project documentation (This file)
+
 ```
 
 ---
 
-## ⚙️ Hướng dẫn cài đặt và khởi chạy
+## ⚙️ Installation and Run Instructions
 
-### 1. Khởi chạy Backend (FastAPI)
+### 1. Running the Backend (FastAPI)
 
-Yêu cầu máy tính đã cài đặt **Python 3.8+**.
+Requires **Python 3.8+** installed on your machine.
 
-Các bước thực hiện từ thư mục gốc của dự án:
+Steps to execute from the project root directory:
 
 ```bash
-# Di chuyển vào thư mục backend
+# Navigate to the backend directory
 cd backend
 
-# Tạo môi trường ảo (Virtual Environment)
+# Create a virtual environment
 python -m venv venv
 
-# Kích hoạt môi trường ảo
-# Trên Windows:
+# Activate the virtual environment
+# On Windows:
 .\venv\Scripts\activate
-# Trên macOS/Linux:
+# On macOS/Linux:
 source venv/bin/activate
 
-# Cài đặt các thư viện cần thiết
+# Install required dependencies
 pip install -r requirements.txt
 
-# Nạp dữ liệu mẫu ban đầu (Seeding Database)
+# Seed initial sample data
 python seed_data.py
 
-# Khởi chạy server phát triển
+# Run the development server
 uvicorn app.main:app --reload
+
 ```
 
-*   **API URL mặc định:** `http://127.0.0.1:8000`
-*   **Trang tài liệu API (Swagger UI):** `http://127.0.0.1:8000/docs` (Truy cập trang này để kiểm tra và dùng thử các API trực quan).
+* **Default API URL:** `http://127.0.0.1:8000`
+* **API Documentation (Swagger UI):** `http://127.0.0.1:8000/docs` (Access this page to test and interactively try out APIs).
 
 ---
 
-### 2. Khởi chạy Frontend (Flutter)
+### 2. Running the Frontend (Flutter)
 
-Yêu cầu máy tính đã cài đặt **Flutter SDK** và các môi trường giả lập tương ứng (Android Emulator, iOS Simulator hoặc trình duyệt Chrome).
+Requires **Flutter SDK** and corresponding emulator environments (Android Emulator, iOS Simulator, or Chrome browser) installed on your machine.
 
-Các bước thực hiện từ thư mục gốc của dự án:
+Steps to execute from the project root directory:
 
 ```bash
-# Di chuyển vào thư mục frontend
+# Navigate to the frontend directory
 cd frontend
 
-# Tải các gói phụ thuộc (Dependencies)
+# Fetch dependencies
 flutter pub get
 
-# Chạy ứng dụng trên thiết bị đang kết nối
+# Run the app on a connected device
 flutter run
+
 ```
 
-#### 📌 Lưu ý cấu hình URL kết nối API:
-*   Mặc định trong file `frontend/lib/core/api_constants.dart` đã cấu hình tự động nhận diện URL:
-    *   **Trình duyệt / Windows / macOS:** `http://127.0.0.1:8000`
-    *   **Giả lập Android Emulator:** `http://10.0.2.2:8000` (được trỏ về localhost của máy host).
-*   Nếu bạn chạy trên thiết bị thật (Real Device), hãy đảm bảo điện thoại và máy tính cùng mạng Wi-Fi, và chạy Flutter bằng lệnh truyền địa chỉ IP máy tính của bạn:
-    ```bash
-    flutter run --dart-define=API_BASE_URL=http://<IP_MÁY_TÍNH>:8000
-    ```
+#### 📌 Note on API Connection URL Configuration:
+
+* By default, the `frontend/lib/core/api_constants.dart` file is configured to automatically detect the URL:
+* **Browser / Windows / macOS:** `http://127.0.0.1:8000`
+* **Android Emulator:** `http://10.0.2.2:8000` (points to the host machine's localhost).
+
+
+* If you run on a real device, ensure your phone and computer are on the same Wi-Fi network, and run Flutter using the command to pass your computer's IP address:
+```bash
+flutter run --dart-define=API_BASE_URL=http://<YOUR_COMPUTER_IP>:8000
+
+```
+
+
 
 ---
 
-## 🔑 Tài khoản dùng thử (Seed Data)
+## 🔑 Trial Accounts (Seed Data)
 
-Sau khi chạy lệnh `python seed_data.py`, cơ sở dữ liệu sẽ được điền các tài khoản mẫu sau để bạn trải nghiệm:
+After running the `python seed_data.py` command, the database will be populated with the following sample accounts for you to experience:
 
-| Vai trò (Role) | Tên đăng nhập (Username) | Mật khẩu (Password) | Mô tả |
-| :--- | :--- | :--- | :--- |
-| **Quản trị viên (Admin)** | `admin` | `admin123` | Có quyền truy cập màn hình Admin để quản lý hệ thống. |
-| **Khách hàng 1 (Customer)** | `user1` | `user123` | Tài khoản mua hàng mẫu 1 (địa chỉ TP.HCM). |
-| **Khách hàng 2 (Customer)** | `user2` | `user123` | Tài khoản mua hàng mẫu 2 (địa chỉ Đà Nẵng). |
+| Role | Username | Password | Description |
+| --- | --- | --- | --- |
+| **Admin** | `admin` | `admin123` | Has access to the Admin screen to manage the system. |
+| **Customer 1** | `user1` | `user123` | Sample buyer account 1 (Ho Chi Minh City address). |
+| **Customer 2** | `user2` | `user123` | Sample buyer account 2 (Da Nang address). |
 
 ---
 
-Chúc bạn có trải nghiệm tuyệt vời với dự án **Book Seller**! Nếu cần hỗ trợ hoặc phát triển thêm tính năng, vui lòng liên hệ nhà phát triển. 🚀
+Have a great experience with the **Book Seller** project! If you need support or further feature development, please contact the developer. 🚀
