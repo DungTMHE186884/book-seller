@@ -46,7 +46,10 @@ class _CartScreenState extends State<CartScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(context.read<CartProvider>().errorMessage ?? 'Mã giảm giá không hợp lệ'),
+            content: Text(
+              context.read<CartProvider>().errorMessage ??
+                  'Mã giảm giá không hợp lệ',
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -61,13 +64,9 @@ class _CartScreenState extends State<CartScreen> {
     final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
 
     final activeItems = cart.activeCartItems;
-    final savedItems = cart.savedForLaterItems;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Giỏ Hàng Của Bạn'),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('Giỏ Hàng Của Bạn'), elevation: 0),
       body: SafeArea(
         child: cart.isLoading && cart.cartItems.isEmpty
             ? const Center(child: CircularProgressIndicator())
@@ -80,24 +79,29 @@ class _CartScreenState extends State<CartScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Active items list
-                      if (activeItems.isEmpty)
+                      if (cart.cartItems.isEmpty)
                         Container(
                           height: 150,
                           alignment: Alignment.center,
-                          child: const Text('Giỏ hàng trống. Hãy chọn thêm sách để mua!'),
+                          child: const Text(
+                            'Giỏ hàng trống. Hãy chọn thêm sách để mua!',
+                          ),
                         )
                       else ...[
                         const Text(
-                          'Sản phẩm chọn mua',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          'Sản phẩm trong giỏ hàng',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                         const SizedBox(height: 10),
                         ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
-                          itemCount: activeItems.length,
+                          itemCount: cart.cartItems.length,
                           itemBuilder: (ctx, i) {
-                            final item = activeItems[i];
+                            final item = cart.cartItems[i];
                             final book = item.book;
                             return Card(
                               margin: const EdgeInsets.only(bottom: 12),
@@ -105,40 +109,71 @@ class _CartScreenState extends State<CartScreen> {
                                 padding: const EdgeInsets.all(10.0),
                                 child: Row(
                                   children: [
+                                    Checkbox(
+                                      value: !item.saveForLater,
+                                      activeColor: theme.colorScheme.primary,
+                                      onChanged: (val) {
+                                        if (val != null) {
+                                          cart.updateCartItem(
+                                            item.id,
+                                            saveForLater: !val,
+                                          );
+                                        }
+                                      },
+                                    ),
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(8),
                                       child: Image.network(
-                                        book.coverImage ?? 'https://picsum.photos/id/101/200/300',
+                                        book.coverImage ??
+                                            'https://picsum.photos/id/101/200/300',
                                         width: 50,
                                         height: 75,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (ctx, error, stackTrace) => Container(
-                                          width: 50,
-                                          height: 75,
-                                          color: Colors.grey[300],
-                                          child: const Icon(Icons.book, size: 24, color: Colors.grey),
-                                        ),
+                                        errorBuilder:
+                                            (ctx, error, stackTrace) =>
+                                                Container(
+                                                  width: 50,
+                                                  height: 75,
+                                                  color: Colors.grey[300],
+                                                  child: const Icon(
+                                                    Icons.book,
+                                                    size: 24,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
                                       ),
                                     ),
                                     const SizedBox(width: 12),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             book.title,
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 15,
+                                            ),
                                           ),
                                           Text(
                                             book.author?.name ?? 'Tác giả',
-                                            style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                                            style: TextStyle(
+                                              color: Colors.grey[600],
+                                              fontSize: 12,
+                                            ),
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            currencyFormat.format(book.effectivePrice),
-                                            style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
+                                            currencyFormat.format(
+                                              book.effectivePrice,
+                                            ),
+                                            style: TextStyle(
+                                              color: theme.colorScheme.primary,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -149,42 +184,63 @@ class _CartScreenState extends State<CartScreen> {
                                           children: [
                                             IconButton(
                                               padding: EdgeInsets.zero,
-                                              constraints: const BoxConstraints(),
-                                              icon: const Icon(Icons.remove_circle_outline, size: 20),
+                                              constraints:
+                                                  const BoxConstraints(),
+                                              icon: const Icon(
+                                                Icons.remove_circle_outline,
+                                                size: 20,
+                                              ),
                                               onPressed: item.quantity > 1
-                                                  ? () => cart.updateCartItem(item.id, quantity: item.quantity - 1)
-                                                  : () => cart.removeFromCart(item.id),
+                                                  ? () => cart.updateCartItem(
+                                                      item.id,
+                                                      quantity:
+                                                          item.quantity - 1,
+                                                    )
+                                                  : () => cart.removeFromCart(
+                                                      item.id,
+                                                    ),
                                             ),
                                             Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                              child: Text('${item.quantity}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8.0,
+                                                  ),
+                                              child: Text(
+                                                '${item.quantity}',
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
                                             ),
                                             IconButton(
                                               padding: EdgeInsets.zero,
-                                              constraints: const BoxConstraints(),
-                                              icon: const Icon(Icons.add_circle_outline, size: 20),
-                                              onPressed: () => cart.updateCartItem(item.id, quantity: item.quantity + 1),
+                                              constraints:
+                                                  const BoxConstraints(),
+                                              icon: const Icon(
+                                                Icons.add_circle_outline,
+                                                size: 20,
+                                              ),
+                                              onPressed: () =>
+                                                  cart.updateCartItem(
+                                                    item.id,
+                                                    quantity: item.quantity + 1,
+                                                  ),
                                             ),
                                           ],
                                         ),
                                         const SizedBox(height: 4),
-                                        Row(
-                                          children: [
-                                            TextButton(
-                                              style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(50, 24)),
-                                              onPressed: () => cart.updateCartItem(item.id, saveForLater: true),
-                                              child: const Text('Mua sau', style: TextStyle(fontSize: 11)),
-                                            ),
-                                            TextButton(
-                                              style: TextButton.styleFrom(
-                                                padding: EdgeInsets.zero,
-                                                minimumSize: const Size(50, 24),
-                                                foregroundColor: Colors.red,
-                                              ),
-                                              onPressed: () => cart.removeFromCart(item.id),
-                                              child: const Text('Xóa', style: TextStyle(fontSize: 11)),
-                                            ),
-                                          ],
+                                        TextButton(
+                                          style: TextButton.styleFrom(
+                                            padding: EdgeInsets.zero,
+                                            minimumSize: const Size(50, 24),
+                                            foregroundColor: Colors.red,
+                                          ),
+                                          onPressed: () =>
+                                              cart.removeFromCart(item.id),
+                                          child: const Text(
+                                            'Xóa',
+                                            style: TextStyle(fontSize: 11),
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -197,78 +253,14 @@ class _CartScreenState extends State<CartScreen> {
                       ],
                       const SizedBox(height: 24),
 
-                      // Save for later items list
-                      if (savedItems.isNotEmpty) ...[
-                        const Text(
-                          'Sản phẩm mua sau (Lưu trữ)',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
-                        const SizedBox(height: 10),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: savedItems.length,
-                          itemBuilder: (ctx, i) {
-                            final item = savedItems[i];
-                            final book = item.book;
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              color: Colors.grey[100],
-                              elevation: 0,
-                              child: Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Row(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.network(
-                                        book.coverImage ?? 'https://picsum.photos/id/101/200/300',
-                                        width: 45,
-                                        height: 68,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            book.title,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                                          ),
-                                          Text(book.author?.name ?? '', style: const TextStyle(fontSize: 11)),
-                                        ],
-                                      ),
-                                    ),
-                                    Row(
-                                      children: [
-                                        TextButton(
-                                          onPressed: () => cart.updateCartItem(item.id, saveForLater: false),
-                                          child: const Text('Thêm lại vào giỏ', style: TextStyle(fontSize: 11)),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-                                          onPressed: () => cart.removeFromCart(item.id),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        const SizedBox(height: 24),
-                      ],
-
                       // Order values calculation
                       if (activeItems.isNotEmpty) ...[
                         const Divider(),
                         const SizedBox(height: 12),
-                        const Text('Mã giảm giá (Coupon)', style: TextStyle(fontWeight: FontWeight.bold)),
+                        const Text(
+                          'Mã giảm giá (Coupon)',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                         const SizedBox(height: 8),
                         Row(
                           children: [
@@ -277,7 +269,10 @@ class _CartScreenState extends State<CartScreen> {
                                 controller: _couponController,
                                 decoration: const InputDecoration(
                                   hintText: 'Nhập mã ví dụ: GIAM10',
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 10,
+                                  ),
                                 ),
                               ),
                             ),
@@ -299,15 +294,21 @@ class _CartScreenState extends State<CartScreen> {
                             children: [
                               Text(
                                 'Đang áp dụng: ${cart.appliedCoupon!['code']}',
-                                style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               TextButton(
                                 onPressed: () {
                                   cart.removeCoupon();
                                   _couponController.clear();
                                 },
-                                child: const Text('Gỡ bỏ', style: TextStyle(color: Colors.red)),
-                              )
+                                child: const Text(
+                                  'Gỡ bỏ',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
                             ],
                           ),
                         ],
@@ -338,7 +339,10 @@ class _CartScreenState extends State<CartScreen> {
                           children: [
                             const Text(
                               'Tổng thanh toán:',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
                             Text(
                               currencyFormat.format(cart.finalAmount),
