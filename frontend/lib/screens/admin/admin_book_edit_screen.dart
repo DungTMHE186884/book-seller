@@ -30,6 +30,25 @@ class _AdminBookEditScreenState extends State<AdminBookEditScreen> {
 
   bool get isEditing => widget.book != null;
 
+  int get _currentId => widget.book?.id ?? -1;
+
+  bool _isDuplicateTitleAuthor(String title) {
+    if (_selectedAuthorId == null) return false;
+    final normalized = title.trim().toLowerCase();
+    return context.read<BookProvider>().books.any((b) =>
+        b.id != _currentId &&
+        b.authorId == _selectedAuthorId &&
+        b.title.trim().toLowerCase() == normalized);
+  }
+
+  bool _isDuplicateIsbn(String isbn) {
+    final normalized = isbn.trim().toLowerCase();
+    if (normalized.isEmpty) return false;
+    return context.read<BookProvider>().books.any((b) =>
+        b.id != _currentId &&
+        (b.isbn ?? '').trim().toLowerCase() == normalized);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -162,7 +181,13 @@ class _AdminBookEditScreenState extends State<AdminBookEditScreen> {
                       TextFormField(
                         controller: _titleController,
                         decoration: const InputDecoration(labelText: 'Tên sách *'),
-                        validator: (val) => val == null || val.trim().isEmpty ? 'Nhập tên sách' : null,
+                        validator: (val) {
+                          if (val == null || val.trim().isEmpty) return 'Nhập tên sách';
+                          if (_isDuplicateTitleAuthor(val)) {
+                            return 'Sách này của tác giả đã tồn tại';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 12),
                       
@@ -200,6 +225,12 @@ class _AdminBookEditScreenState extends State<AdminBookEditScreen> {
                       TextFormField(
                         controller: _isbnController,
                         decoration: const InputDecoration(labelText: 'ISBN'),
+                        validator: (val) {
+                          if (val != null && _isDuplicateIsbn(val)) {
+                            return 'Mã ISBN này đã tồn tại';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 12),
 
@@ -211,8 +242,10 @@ class _AdminBookEditScreenState extends State<AdminBookEditScreen> {
                               decoration: const InputDecoration(labelText: 'Giá bán *'),
                               keyboardType: TextInputType.number,
                               validator: (val) {
-                                if (val == null || val.isEmpty) return 'Nhập giá bán';
-                                if (double.tryParse(val) == null) return 'Giá trị không hợp lệ';
+                                if (val == null || val.trim().isEmpty) return 'Nhập giá bán';
+                                final price = double.tryParse(val.trim());
+                                if (price == null) return 'Giá trị không hợp lệ';
+                                if (price <= 0) return 'Giá bán phải lớn hơn 0';
                                 return null;
                               },
                             ),
@@ -223,6 +256,17 @@ class _AdminBookEditScreenState extends State<AdminBookEditScreen> {
                               controller: _discountPriceController,
                               decoration: const InputDecoration(labelText: 'Giá khuyến mãi'),
                               keyboardType: TextInputType.number,
+                              validator: (val) {
+                                if (val == null || val.trim().isEmpty) return null;
+                                final discount = double.tryParse(val.trim());
+                                if (discount == null) return 'Giá trị không hợp lệ';
+                                if (discount < 0) return 'Không được âm';
+                                final price = double.tryParse(_priceController.text.trim());
+                                if (price != null && discount >= price) {
+                                  return 'Phải nhỏ hơn giá bán';
+                                }
+                                return null;
+                              },
                             ),
                           ),
                         ],
@@ -234,8 +278,10 @@ class _AdminBookEditScreenState extends State<AdminBookEditScreen> {
                         decoration: const InputDecoration(labelText: 'Số lượng tồn kho *'),
                         keyboardType: TextInputType.number,
                         validator: (val) {
-                          if (val == null || val.isEmpty) return 'Nhập số lượng kho';
-                          if (int.tryParse(val) == null) return 'Giá trị không hợp lệ';
+                          if (val == null || val.trim().isEmpty) return 'Nhập số lượng kho';
+                          final stock = int.tryParse(val.trim());
+                          if (stock == null) return 'Giá trị không hợp lệ';
+                          if (stock < 0) return 'Số lượng không được âm';
                           return null;
                         },
                       ),
