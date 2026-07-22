@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
 import 'auth/login_screen.dart';
-import 'customer/main_navigation_screen.dart';
-import 'admin/admin_dashboard_screen.dart';
+import 'customer/main_navigation_screen.dart';      
+import 'admin/admin_dashboard_screen.dart';       
 
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
