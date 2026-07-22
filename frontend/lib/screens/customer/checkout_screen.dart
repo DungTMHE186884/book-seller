@@ -255,7 +255,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ],
                     ),
                   ),
-                ),
+                ),       
                 const SizedBox(height: 32),
 
                 // Submit Button
