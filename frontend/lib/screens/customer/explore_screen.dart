@@ -1,13 +1,18 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+// Import các thư viện lõi của Flutter và các package hỗ trợ
+import 'package:flutter/material.dart'; // Cung cấp bộ thư viện thiết kế Material Design
+import 'package:provider/provider.dart'; // Quản lý trạng thái ứng dụng
 
-import '../../providers/book_provider.dart';
-import '../../widgets/book_card.dart';
-import '../../models/category_model.dart';
-import '../../models/author_model.dart';
-import '../../models/publisher_model.dart';
-import '../../widgets/cart_badge_button.dart';
+// Import các file quản lý dữ liệu (Provider) và các widget dùng chung
+import '../../providers/book_provider.dart'; // Quản lý dữ liệu sách (tìm kiếm, lọc, danh mục...)
+import '../../widgets/book_card.dart'; // Widget hiển thị thông tin tóm tắt của một cuốn sách dưới dạng thẻ
+import '../../models/category_model.dart'; // Model dữ liệu Thể loại
+import '../../models/author_model.dart'; // Model dữ liệu Tác giả
+import '../../models/publisher_model.dart'; // Model dữ liệu Nhà xuất bản
+import '../../widgets/cart_badge_button.dart'; // Nút giỏ hàng có huy hiệu đếm số lượng đặt hàng
 
+/// [ExploreScreen] là màn hình Tìm kiếm và Khám phá sách.
+/// Cho phép người dùng tìm sách theo tên, tác giả, thể loại, hoặc nhà xuất bản,
+/// đồng thời có tính năng lọc nâng cao và sắp xếp kết quả.
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
 
@@ -16,35 +21,42 @@ class ExploreScreen extends StatefulWidget {
 }
 
 class _ExploreScreenState extends State<ExploreScreen> {
+  // Bộ điều khiển ô nhập liệu tìm kiếm (ô Search)
   final _searchController = TextEditingController();
-  int? _tempCategoryId;
-  int? _tempAuthorId;
-  int? _tempPublisherId;
-  String? _tempSortBy;
 
-  int? _activeCategoryId;
-  int? _activeAuthorId;
-  int? _activePublisherId;
-  String? _activeSortBy;
+  // Nhóm biến tạm thời lưu cấu hình lọc bên trong BottomSheet trước khi bấm "Áp Dụng"
+  int? _tempCategoryId; // Thể loại tạm thời
+  int? _tempAuthorId; // Tác giả tạm thời
+  int? _tempPublisherId; // Nhà xuất bản tạm thời
+  String? _tempSortBy; // Cách sắp xếp tạm thời (Ví dụ: giá tăng dần, sách mới nhất...)
 
+  // Nhóm biến chính thức ghi nhận bộ lọc đang được áp dụng để tải sách từ API
+  int? _activeCategoryId; // Thể loại đang áp dụng
+  int? _activeAuthorId; // Tác giả đang áp dụng
+  int? _activePublisherId; // Nhà xuất bản đang áp dụng
+  String? _activeSortBy; // Cách sắp xếp đang áp dụng
+
+  /// Khởi tạo trạng thái ban đầu của màn hình khám phá sách
   @override
   void initState() {
     super.initState();
+    // Gọi API tải danh mục lọc và danh sách sách ban đầu ngay khi màn hình dựng xong frame đầu tiên
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<BookProvider>().fetchAuthors();
-      context.read<BookProvider>().fetchPublishers();
-      context.read<BookProvider>().fetchCategories();
-      // Load initial books
-      context.read<BookProvider>().fetchSearchBooks();
+      context.read<BookProvider>().fetchAuthors(); // Tải danh sách tác giả cho bộ lọc
+      context.read<BookProvider>().fetchPublishers(); // Tải danh sách nhà xuất bản cho bộ lọc
+      context.read<BookProvider>().fetchCategories(); // Tải danh sách thể loại sách
+      context.read<BookProvider>().fetchSearchBooks(); // Tải danh sách sách ban đầu (không lọc)
     });
   }
 
+  /// Giải phóng bộ nhớ của bộ điều khiển TextField khi hủy màn hình
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
   }
 
+  /// Thực hiện tìm kiếm sách bằng cách gửi chuỗi tìm kiếm và bộ lọc đang kích hoạt sang BookProvider
   void _triggerSearch() {
     context.read<BookProvider>().fetchSearchBooks(
       query: _searchController.text.trim(),
@@ -55,10 +67,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
     );
   }
 
+  /// Hiển thị một trang bộ lọc dạng cuộn trượt từ dưới lên (Modal Bottom Sheet)
   void _showFilterSheet() {
     final bookProv = context.read<BookProvider>();
 
-    // Initialize temporary states with current active states
+    // Đồng bộ giá trị tạm thời (temp) bằng với các bộ lọc đang hoạt động (active) trước khi mở sheet
     setState(() {
       _tempCategoryId = _activeCategoryId;
       _tempAuthorId = _activeAuthorId;
@@ -68,24 +81,28 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true,
+      isScrollControlled: true, // Cho phép kéo rộng BottomSheet hơn mức mặc định
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)), // Bo góc tròn ở mép trên BottomSheet
       ),
       builder: (ctx) {
+        // Sử dụng StatefulBuilder để quản lý trạng thái cập nhật giao diện TRONG PHẠM VI BottomSheet.
+        // Điều này giúp thay đổi nút chọn (ChoiceChip, Dropdown) trong sheet mà không cần rebuild lại toàn bộ trang ExploreScreen phía dưới.
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setModalState) {
+            // DraggableScrollableSheet cho phép kéo vuốt để điều chỉnh kích thước BottomSheet linh hoạt
             return DraggableScrollableSheet(
-              initialChildSize: 0.75,
-              maxChildSize: 0.9,
-              expand: false,
+              initialChildSize: 0.75, // Kích thước hiển thị ban đầu chiếm 75% màn hình
+              maxChildSize: 0.9, // Chiều cao tối đa khi kéo rộng lên chiếm 90% màn hình
+              expand: false, // Không chiếm toàn bộ màn hình một cách ép buộc
               builder: (_, controller) {
                 return SingleChildScrollView(
-                  controller: controller,
+                  controller: controller, // Gán controller cuộn để BottomSheet bắt được thao tác vuốt cuộn của người dùng
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Dòng tiêu đề và nút Đặt lại (Reset)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -98,6 +115,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           ),
                           TextButton(
                             onPressed: () {
+                              // Reset toàn bộ các biến lọc tạm thời về rỗng
                               setModalState(() {
                                 _tempCategoryId = null;
                                 _tempAuthorId = null;
@@ -112,18 +130,18 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       const Divider(),
                       const SizedBox(height: 16),
 
-                      // Sắp xếp
+                      // Phần 1: Các tùy chọn Sắp xếp (Sort By) hiển thị dạng thẻ ChoiceChip
                       const Text(
                         'Sắp xếp theo',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
                       Wrap(
-                        spacing: 8,
+                        spacing: 8, // Khoảng cách ngang giữa các thẻ
                         children: [
                           ChoiceChip(
                             label: const Text('Giá: Thấp → Cao'),
-                            selected: _tempSortBy == 'price_asc',
+                            selected: _tempSortBy == 'price_asc', // Đánh dấu nếu được chọn
                             onSelected: (sel) => setModalState(
                               () => _tempSortBy = sel ? 'price_asc' : null,
                             ),
@@ -153,7 +171,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       ),
                       const SizedBox(height: 20),
 
-                      // Thể loại
+                      // Phần 2: Thể loại (Dropdown chọn một danh mục)
                       const Text(
                         'Thể loại',
                         style: TextStyle(fontWeight: FontWeight.bold),
@@ -169,12 +187,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
                             child: Text(c.name),
                           );
                         }).toList(),
-                        onChanged: (val) =>
-                            setModalState(() => _tempCategoryId = val),
+                        onChanged: (val) => setModalState(() => _tempCategoryId = val),
                       ),
                       const SizedBox(height: 20),
 
-                      // Tác giả
+                      // Phần 3: Tác giả (Dropdown chọn một tác giả)
                       const Text(
                         'Tác giả',
                         style: TextStyle(fontWeight: FontWeight.bold),
@@ -190,12 +207,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
                             child: Text(a.name),
                           );
                         }).toList(),
-                        onChanged: (val) =>
-                            setModalState(() => _tempAuthorId = val),
+                        onChanged: (val) => setModalState(() => _tempAuthorId = val),
                       ),
                       const SizedBox(height: 20),
 
-                      // Nhà xuất bản
+                      // Phần 4: Nhà xuất bản (Dropdown chọn một nhà xuất bản)
                       const Text(
                         'Nhà xuất bản',
                         style: TextStyle(fontWeight: FontWeight.bold),
@@ -211,22 +227,22 @@ class _ExploreScreenState extends State<ExploreScreen> {
                             child: Text(p.name),
                           );
                         }).toList(),
-                        onChanged: (val) =>
-                            setModalState(() => _tempPublisherId = val),
+                        onChanged: (val) => setModalState(() => _tempPublisherId = val),
                       ),
                       const SizedBox(height: 36),
 
-                      // Apply button
+                      // Nút "Áp dụng bộ lọc"
                       ElevatedButton(
                         onPressed: () {
+                          // Khi bấm áp dụng, chuyển toàn bộ trạng thái tạm thời (temp) thành chính thức (active)
                           setState(() {
                             _activeCategoryId = _tempCategoryId;
                             _activeAuthorId = _tempAuthorId;
                             _activePublisherId = _tempPublisherId;
                             _activeSortBy = _tempSortBy;
                           });
-                          _triggerSearch();
-                          Navigator.of(ctx).pop();
+                          _triggerSearch(); // Thực thi truy vấn dữ liệu từ API
+                          Navigator.of(ctx).pop(); // Đóng BottomSheet
                         },
                         child: const Text('ÁP DỤNG BỘ LỌC'),
                       ),
@@ -243,6 +259,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Watch để theo dõi trạng thái từ BookProvider (tải dữ liệu sách, trạng thái loading...)
     final bookProv = context.watch<BookProvider>();
     final theme = Theme.of(context);
 
@@ -250,50 +267,51 @@ class _ExploreScreenState extends State<ExploreScreen> {
       appBar: AppBar(
         title: const Text('Khám Phá Sách'),
         elevation: 0,
-        actions: const [CartBadgeButton()],
+        actions: const [CartBadgeButton()], // Thêm giỏ hàng góc trên cùng bên phải
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Column(
             children: [
-              // Search input & Filter trigger
+              // Thanh tìm kiếm (Search bar) và nút mở bộ lọc nâng cao
               Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _searchController,
-                      textInputAction: TextInputAction.search,
-                      onSubmitted: (_) => _triggerSearch(),
+                      textInputAction: TextInputAction.search, // Hiển thị nút "Tìm kiếm" (Search) trên bàn phím ảo
+                      onSubmitted: (_) => _triggerSearch(), // Thực hiện tìm kiếm khi bấm Enter/Search trên bàn phím
                       decoration: InputDecoration(
                         hintText: 'Tên sách, tác giả, thể loại, ISBN...',
                         prefixIcon: const Icon(Icons.search),
+                        // Hiển thị nút Xóa nhanh (Clear) nếu ô nhập có ký tự
                         suffixIcon: _searchController.text.isNotEmpty
                             ? IconButton(
                                 icon: const Icon(Icons.clear),
                                 onPressed: () {
-                                  _searchController.clear();
-                                  _triggerSearch();
+                                  _searchController.clear(); // Xóa rỗng văn bản nhập
+                                  _triggerSearch(); // Kích hoạt tải lại danh sách sách
                                 },
                               )
                             : null,
                       ),
                       onChanged: (val) {
-                        setState(
-                          () {},
-                        ); // updates suffix clear button visibility
-                        _triggerSearch();
+                        setState(() {}); // Rebuild lại để hiển thị/ẩn nút Xóa (clear)
+                        _triggerSearch(); // Tìm kiếm thời gian thực (Real-time search) khi gõ phím
                       },
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // Filter Button
+                  
+                  // Nút mở BottomSheet lọc nâng cao
                   Stack(
                     children: [
                       IconButton.filledTonal(
                         icon: const Icon(Icons.tune),
                         onPressed: _showFilterSheet,
                       ),
+                      // Hiển thị chấm đỏ thông báo (Badge) trên nút lọc nếu có bất kỳ bộ lọc nào đang hoạt động
                       if (_activeCategoryId != null ||
                           _activeAuthorId != null ||
                           _activePublisherId != null ||
@@ -312,7 +330,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Active filter tags (if any)
+              // Danh sách các thẻ Chip bộ lọc đang kích hoạt để người dùng dễ quan sát và xóa nhanh
               if (_activeCategoryId != null ||
                   _activeAuthorId != null ||
                   _activePublisherId != null ||
@@ -320,19 +338,21 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 SizedBox(
                   height: 36,
                   child: ListView(
-                    scrollDirection: Axis.horizontal,
+                    scrollDirection: Axis.horizontal, // Cho phép cuộn các tag theo chiều ngang
                     children: [
+                      // Chip sắp xếp
                       if (_activeSortBy != null)
                         Padding(
                           padding: const EdgeInsets.only(right: 6.0),
                           child: InputChip(
                             label: Text('Sắp xếp: $_activeSortBy'),
                             onDeleted: () {
-                              setState(() => _activeSortBy = null);
+                              setState(() => _activeSortBy = null); // Gỡ bỏ cách sắp xếp
                               _triggerSearch();
                             },
                           ),
                         ),
+                      // Chip thể loại
                       if (_activeCategoryId != null)
                         Padding(
                           padding: const EdgeInsets.only(right: 6.0),
@@ -343,11 +363,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                   .name,
                             ),
                             onDeleted: () {
-                              setState(() => _activeCategoryId = null);
+                              setState(() => _activeCategoryId = null); // Gỡ bỏ lọc thể loại
                               _triggerSearch();
                             },
                           ),
                         ),
+                      // Chip tác giả
                       if (_activeAuthorId != null)
                         Padding(
                           padding: const EdgeInsets.only(right: 6.0),
@@ -358,11 +379,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                   .name,
                             ),
                             onDeleted: () {
-                              setState(() => _activeAuthorId = null);
+                              setState(() => _activeAuthorId = null); // Gỡ bỏ lọc tác giả
                               _triggerSearch();
                             },
                           ),
                         ),
+                      // Chip nhà xuất bản
                       if (_activePublisherId != null)
                         Padding(
                           padding: const EdgeInsets.only(right: 6.0),
@@ -373,7 +395,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                   .name,
                             ),
                             onDeleted: () {
-                              setState(() => _activePublisherId = null);
+                              setState(() => _activePublisherId = null); // Gỡ bộ lọc NXB
                               _triggerSearch();
                             },
                           ),
@@ -384,11 +406,13 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 const SizedBox(height: 12),
               ],
 
-              // Results grid
+              // Lưới kết quả tìm kiếm (Grid View hiển thị sách)
               Expanded(
                 child: bookProv.searchBooks.isEmpty
                     ? (bookProv.isSearching
+                          // Hiện vòng xoay tải nếu đang tìm kiếm từ API
                           ? const Center(child: CircularProgressIndicator())
+                          // Hiện thông báo trống nếu không tìm thấy cuốn sách nào khớp
                           : Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -406,30 +430,27 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                 ],
                               ),
                             ))
+                    // Hiển thị danh sách kết quả dưới dạng Lưới (Grid)
                     : RefreshIndicator(
-                        onRefresh: () async => _triggerSearch(),
+                        onRefresh: () async => _triggerSearch(), // Vuốt để làm mới danh sách kết quả
                         child: GridView.builder(
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount:
-                                    MediaQuery.of(context).size.width > 900
-                                    ? 5
-                                    : (MediaQuery.of(context).size.width > 600
-                                          ? 3
-                                          : 2),
-                                crossAxisSpacing: 12,
-                                mainAxisSpacing: 16,
-                                childAspectRatio:
-                                    MediaQuery.of(context).size.width > 900
-                                    ? 0.54
-                                    : (MediaQuery.of(context).size.width > 600
-                                          ? 0.52
-                                          : 0.46),
-                              ),
+                          // Cấu hình tỷ lệ hiển thị lưới thông minh và responsive dựa trên chiều rộng màn hình
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            // Nếu màn hình PC/Web (> 900px): chia 5 cột. Nếu Tablet (> 600px): chia 3 cột. Nếu Mobile: chia 2 cột.
+                            crossAxisCount: MediaQuery.of(context).size.width > 900
+                                ? 5
+                                : (MediaQuery.of(context).size.width > 600 ? 3 : 2),
+                            crossAxisSpacing: 12, // Khoảng cách cột ngang
+                            mainAxisSpacing: 16, // Khoảng cách hàng dọc
+                            // Tỷ lệ khung hình (chiều rộng / chiều cao) của thẻ sách để tránh bị tràn chữ
+                            childAspectRatio: MediaQuery.of(context).size.width > 900
+                                ? 0.54
+                                : (MediaQuery.of(context).size.width > 600 ? 0.52 : 0.46),
+                          ),
                           itemCount: bookProv.searchBooks.length,
                           itemBuilder: (ctx, i) => BookCard(
                             book: bookProv.searchBooks[i],
-                            width: double.infinity,
+                            width: double.infinity, // Thẻ sách tự giãn vừa khít ô Grid
                           ),
                         ),
                       ),
