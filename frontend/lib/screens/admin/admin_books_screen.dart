@@ -83,7 +83,7 @@ class _AdminBooksScreenState extends State<AdminBooksScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Xác nhận xóa'),
-        content: Text('Bạn có chắc chắn muốn xóa cuốn sách "$title"?'),
+        content: Text('Bạn có chắc chắn muốn xóa sách "$title"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
