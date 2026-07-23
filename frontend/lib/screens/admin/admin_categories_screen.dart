@@ -14,7 +14,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final _nameController = TextEditingController();
-  final _extraController = TextEditingController(); // bio or address
+  final _extraController = TextEditingController();
 
   @override
   void initState() {
@@ -146,7 +146,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen>
       showExtra = true;
     } else {
       title = 'Sửa thông tin nhà xuất bản';
-      extraLabel = 'Địa chỉ';
+      extraLabel = 'Địa chỉ NXB';
       showExtra = true;
     }
 
@@ -225,7 +225,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen>
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Xác nhận xóa'),
-        content: Text('Bạn có chắc muốn xóa "$name"?'),
+        content: Text('Bạn có chắc chắn muốn xóa "$name"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
