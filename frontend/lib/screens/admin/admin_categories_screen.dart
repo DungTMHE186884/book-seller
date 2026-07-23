@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../providers/book_provider.dart';
 
+/// Admin screen to manage categories, authors, and publishers.
 class AdminCategoriesScreen extends StatefulWidget {
   const AdminCategoriesScreen({super.key});
 
@@ -12,6 +13,7 @@ class AdminCategoriesScreen extends StatefulWidget {
 
 class _AdminCategoriesScreenState extends State<AdminCategoriesScreen>
     with SingleTickerProviderStateMixin {
+  // Controllers for tab navigation and dialog input fields.
   late TabController _tabController;
   final _nameController = TextEditingController();
   final _extraController = TextEditingController();
@@ -20,6 +22,8 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+
+    // Fetch initial data after widget build completes.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final p = context.read<BookProvider>();
       p.fetchCategories();
@@ -36,6 +40,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen>
     super.dispose();
   }
 
+  // Show dialog to add a new category (0), author (1), or publisher (2).
   void _showAddDialog(int type) {
     // type: 0 = Category, 1 = Author, 2 = Publisher
     _nameController.clear();
@@ -125,6 +130,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen>
     );
   }
 
+  // Show dialog to edit the selected item.
   void _showEditDialog(
     int type,
     int id,
@@ -220,6 +226,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen>
     );
   }
 
+  // Show confirmation dialog and delete the selected item.
   void _deleteItem(int type, int id, String name) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -269,7 +276,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen>
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 0, // hide appbar title, we only need tabs
+        toolbarHeight: 0, // Hide AppBar title, keep TabBar at the bottom
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
