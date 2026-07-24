@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../providers/book_provider.dart';
 
+/// Admin screen to manage categories, authors, and publishers.
 class AdminCategoriesScreen extends StatefulWidget {
   const AdminCategoriesScreen({super.key});
 
@@ -12,14 +13,17 @@ class AdminCategoriesScreen extends StatefulWidget {
 
 class _AdminCategoriesScreenState extends State<AdminCategoriesScreen>
     with SingleTickerProviderStateMixin {
+  // Controllers for tab navigation and dialog input fields.
   late TabController _tabController;
   final _nameController = TextEditingController();
-  final _extraController = TextEditingController(); // bio or address
+  final _extraController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+
+    // Fetch initial data after widget build completes.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final p = context.read<BookProvider>();
       p.fetchCategories();
@@ -36,6 +40,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen>
     super.dispose();
   }
 
+  // Show dialog to add a new category (0), author (1), or publisher (2).
   void _showAddDialog(int type) {
     // type: 0 = Category, 1 = Author, 2 = Publisher
     _nameController.clear();
@@ -125,6 +130,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen>
     );
   }
 
+  // Show dialog to edit the selected item.
   void _showEditDialog(
     int type,
     int id,
@@ -146,7 +152,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen>
       showExtra = true;
     } else {
       title = 'Sửa thông tin nhà xuất bản';
-      extraLabel = 'Địa chỉ';
+      extraLabel = 'Địa chỉ NXB';
       showExtra = true;
     }
 
@@ -220,12 +226,13 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen>
     );
   }
 
+  // Show confirmation dialog and delete the selected item.
   void _deleteItem(int type, int id, String name) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Xác nhận xóa'),
-        content: Text('Bạn có chắc muốn xóa "$name"?'),
+        content: Text('Bạn có chắc chắn muốn xóa "$name"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
@@ -269,7 +276,7 @@ class _AdminCategoriesScreenState extends State<AdminCategoriesScreen>
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 0, // hide appbar title, we only need tabs
+        toolbarHeight: 0, // Hide AppBar title, keep TabBar at the bottom
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
